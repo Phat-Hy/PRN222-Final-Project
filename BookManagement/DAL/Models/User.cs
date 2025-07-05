@@ -23,5 +23,7 @@ namespace DAL.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public ICollection<UserBookCollection> Collections { get; set; }
+
+        public Boolean IsActive { get; set; }
     }
 }
