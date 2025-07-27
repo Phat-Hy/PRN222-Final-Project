@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DAL.Models
 {
@@ -16,18 +12,28 @@ namespace DAL.Models
         public User User { get; set; }
 
         [Required]
-        public int BookId { get; set; }
-        public Book Book { get; set; }
+        public int BookSeriesId { get; set; }
+        public BookSeries BookSeries { get; set; }
 
-        public bool IsOwned { get; set; } = false;
+        /// <summary>
+        /// Whether the user owns at least one volume in the series
+        /// </summary>
+        public bool IsOwned => !string.IsNullOrEmpty(OwnedVolumes);
 
-        public bool IsWishlist { get; set; } = false;
+        /// <summary>
+        /// Whether the user wishes to own at least one volume in the series
+        /// </summary>
+        public bool IsWishlist => !string.IsNullOrEmpty(WishlistVolumes);
 
-        // e.g., "1,2,3" means user owns volumes 1, 2, and 3
-        public string OwnedVolumes { get; set; }
+        /// <summary>
+        /// Comma-separated string of owned volume numbers (e.g., "1,2,3")
+        /// </summary>
+        public string OwnedVolumes { get; set; } = string.Empty;
 
-        // e.g., "4,5" means user wants to buy volumes 4 and 5
-        public string WishlistVolumes { get; set; }
+        /// <summary>
+        /// Comma-separated string of wishlist volume numbers (e.g., "4,5")
+        /// </summary>
+        public string WishlistVolumes { get; set; } = string.Empty;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }

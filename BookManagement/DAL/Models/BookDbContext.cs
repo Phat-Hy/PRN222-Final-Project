@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
 namespace DAL.Models
@@ -15,12 +12,34 @@ namespace DAL.Models
         }
 
         public DbSet<User> Users { get; set; }
-        public DbSet<Book> Books { get; set; }
+        public DbSet<BookSeries> BookSeries { get; set; }
+        public DbSet<BookVolume> BookVolumes { get; set; }
         public DbSet<UserBookCollection> UserBookCollections { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            // BookSeries - BookVolumes (1-to-many)
+            modelBuilder.Entity<BookSeries>()
+                .HasMany(bs => bs.Volumes)
+                .WithOne(v => v.BookSeries)
+                .HasForeignKey(v => v.BookSeriesId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // BookSeries - UserBookCollection (1-to-many)
+            modelBuilder.Entity<BookSeries>()
+                .HasMany(bs => bs.UserCollections)
+                .WithOne(uc => uc.BookSeries)
+                .HasForeignKey(uc => uc.BookSeriesId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // User - BookSeries (optional reverse navigation)
+            modelBuilder.Entity<BookSeries>()
+                .HasOne(bs => bs.CreatedByUser)
+                .WithMany()
+                .HasForeignKey(bs => bs.CreatedByUserId)
+                .OnDelete(DeleteBehavior.SetNull);
 
             // User - UserBookCollection (1-to-many)
             modelBuilder.Entity<User>()
@@ -28,20 +47,6 @@ namespace DAL.Models
                 .WithOne(c => c.User)
                 .HasForeignKey(c => c.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
-
-            // Book - UserBookCollection (1-to-many)
-            modelBuilder.Entity<Book>()
-                .HasMany(b => b.UserCollections)
-                .WithOne(uc => uc.Book)
-                .HasForeignKey(uc => uc.BookId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            // User - Book (user-created books)
-            modelBuilder.Entity<Book>()
-                .HasOne(b => b.CreatedByUser)
-                .WithMany() // Optional: WithMany(u => u.CreatedBooks) if you want reverse navigation
-                .HasForeignKey(b => b.CreatedByUserId)
-                .OnDelete(DeleteBehavior.SetNull); // Keeps the book even if the user is deleted
 
             // Default timestamps
             modelBuilder.Entity<User>()

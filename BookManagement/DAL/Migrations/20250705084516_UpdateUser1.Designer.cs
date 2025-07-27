@@ -4,6 +4,7 @@ using DAL.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DAL.Migrations
 {
     [DbContext(typeof(BookDbContext))]
-    partial class BookDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250705084516_UpdateUser1")]
+    partial class UpdateUser1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,7 +25,7 @@ namespace DAL.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("DAL.Models.BookSeries", b =>
+            modelBuilder.Entity("Book", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -33,6 +36,12 @@ namespace DAL.Migrations
                     b.Property<string>("Author")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("ChapterFrom")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ChapterTo")
+                        .HasColumnType("int");
 
                     b.Property<string>("CoverImageUrl")
                         .IsRequired()
@@ -54,55 +63,23 @@ namespace DAL.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<string>("Translator")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedByUserId");
-
-                    b.ToTable("BookSeries");
-                });
-
-            modelBuilder.Entity("DAL.Models.BookVolume", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("BookSeriesId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ChapterFrom")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ChapterTo")
-                        .HasColumnType("int");
-
-                    b.Property<string>("CoverImageUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<decimal?>("Price")
                         .HasColumnType("decimal(10,2)");
 
                     b.Property<DateTime?>("ReleaseDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("VolumeNumber")
+                    b.Property<string>("Translator")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("Volume")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BookSeriesId");
+                    b.HasIndex("CreatedByUserId");
 
-                    b.ToTable("BookVolumes");
+                    b.ToTable("Books");
                 });
 
             modelBuilder.Entity("DAL.Models.User", b =>
@@ -151,13 +128,19 @@ namespace DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("BookSeriesId")
+                    b.Property<int>("BookId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<bool>("IsOwned")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsWishlist")
+                        .HasColumnType("bit");
 
                     b.Property<string>("OwnedVolumes")
                         .IsRequired()
@@ -172,14 +155,14 @@ namespace DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BookSeriesId");
+                    b.HasIndex("BookId");
 
                     b.HasIndex("UserId");
 
                     b.ToTable("UserBookCollections");
                 });
 
-            modelBuilder.Entity("DAL.Models.BookSeries", b =>
+            modelBuilder.Entity("Book", b =>
                 {
                     b.HasOne("DAL.Models.User", "CreatedByUser")
                         .WithMany()
@@ -189,22 +172,11 @@ namespace DAL.Migrations
                     b.Navigation("CreatedByUser");
                 });
 
-            modelBuilder.Entity("DAL.Models.BookVolume", b =>
-                {
-                    b.HasOne("DAL.Models.BookSeries", "BookSeries")
-                        .WithMany("Volumes")
-                        .HasForeignKey("BookSeriesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("BookSeries");
-                });
-
             modelBuilder.Entity("DAL.Models.UserBookCollection", b =>
                 {
-                    b.HasOne("DAL.Models.BookSeries", "BookSeries")
+                    b.HasOne("Book", "Book")
                         .WithMany("UserCollections")
-                        .HasForeignKey("BookSeriesId")
+                        .HasForeignKey("BookId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -214,16 +186,14 @@ namespace DAL.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("BookSeries");
+                    b.Navigation("Book");
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("DAL.Models.BookSeries", b =>
+            modelBuilder.Entity("Book", b =>
                 {
                     b.Navigation("UserCollections");
-
-                    b.Navigation("Volumes");
                 });
 
             modelBuilder.Entity("DAL.Models.User", b =>

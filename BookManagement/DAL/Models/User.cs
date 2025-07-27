@@ -25,5 +25,6 @@ namespace DAL.Models
         public ICollection<UserBookCollection> Collections { get; set; }
 
         public Boolean IsActive { get; set; }
+        public string Role { get; set; } = "User";
     }
 }
